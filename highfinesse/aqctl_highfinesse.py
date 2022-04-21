@@ -21,9 +21,6 @@ def get_argparser():
         description="ARTIQ controller for the Britton Lab High Finesse wavemeter")
     common_args.simple_network_args(parser, 3260)
     parser.add_argument(
-        "-d", "--device", default=None,
-        help="serial port.")
-    parser.add_argument(
         "--simulation", action="store_true",
         help="Put the driver in simulation mode, even if --device is used.")
     common_args.verbosity_args(parser)
@@ -37,16 +34,11 @@ def main():
     if os.name == "nt":
         asyncio.set_event_loop(asyncio.ProactorEventLoop())
 
-    if not args.simulation and args.device is None:
-        print("You need to specify either --simulation or -d/--device "
-              "argument. Use --help for more information.")
-        sys.exit(1)
-
-    dev = HighFinesse(args.device if not args.simulation else None)
+    dev = HighFinesse(args.simulation)
     asyncio.get_event_loop().run_until_complete(dev.init())
     try:
         simple_server_loop(
-            {"highfinesse": dev}, common_args.bind_address_from_args(args), args.port)
+            {"HighFinesse": dev}, common_args.bind_address_from_args(args), args.port)
     finally:
         dev.close()
 

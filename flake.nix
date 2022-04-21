@@ -20,23 +20,12 @@
             };
             propagatedBuildInputs = with pkgs.python3Packages; [ numpy ];
         };
-        asyncserial = pkgs.python3Packages.buildPythonPackage rec {
-            pname = "asyncserial";
-            version = "0.1";
-            src = pkgs.fetchFromGitHub {
-                owner = "m-labs";
-                repo = "asyncserial";
-                rev = "d95bc1d6c791b0e9785935d2f62f628eb5cdf98d";
-                sha256 = "0yzkka9jk3612v8gx748x6ziwykq5lr7zmr9wzkcls0v2yilqx9k";
-            };
-            propagatedBuildInputs = with pkgs.python3Packages; [ pyserial ];
-        };
     in {
         defaultPackage.x86_64-linux = pkgs.python3Packages.buildPythonApplication ({
                 name = "aqctl_highfinesse";
                 version = "1.0";
                 src = ./.;
-                propagatedBuildInputs = [ sipyco asyncserial ];
+                propagatedBuildInputs = [ sipyco ];
         });
     };
 }

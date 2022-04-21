@@ -4,10 +4,9 @@
 
 import logging
 import asyncio
-import wlm_constants as wlm
+from highfinesse import wlm_constants as wlm
 from enum import IntEnum
-
-try:  # allow us to run simulations on Linux
+try:  # permits running in simulation mode on linux
     from ctypes import windll, c_double, c_ushort, c_long, c_bool, byref, c_short
 except ImportError:
     pass
@@ -21,15 +20,18 @@ WavelengthRange = {
     "IR": 7
 }
 
+
 class WLMMeasurementStatus(IntEnum):
     OKAY = 0,
     UNDER_EXPOSED = 1,
     OVER_EXPOSED = 2,
     ERROR = 3
 
+
 class WLMException(Exception):
     """ Raised on errors involving the WLM interface library (windata.dll) """
     pass
+
 
 class UnexpectedResponse(Exception):
     pass
@@ -47,7 +49,12 @@ class HighFinesse:
         try:
             self.lib = lib = windll.wlmData
         except Exception as e:
-            raise WLMException("Failed to load WLM DLL: {}".format(e))
+            raise WLMException("Failed to load WLM DLL (is HighFinesse software installed?): {}".format(e))
+
+        self.wlm_model = -1
+        self.wlm_hw_rev = -1
+        self.wlm_fw_rev = -1
+        self.wlm_fw_build = -1
 
         # configure DLL function arg/return types
         lib.Operation.restype = c_long
@@ -110,7 +117,7 @@ class HighFinesse:
             self.wlm_model, self.wlm_hw_rev, self.wlm_fw_rev,
             self.wlm_fw_build)
 
-    async def get_status(self)
+    async def get_status(self):
         """Hook for async loop."""
         # TODO implement this
         pass
@@ -163,7 +170,7 @@ class HighFinesse:
         # I've had a long discussion with the HF engineers about why this
         # occurs on some units, without any real success.
         try:
-            #self._get_fresh_data()
+            # self._get_fresh_data()
             freq = self.lib.GetFrequencyNum(ch, 0)
         except WLMException as e:
             logger.error("error during frequency read: {}".format(e))
