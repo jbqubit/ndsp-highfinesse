@@ -7,7 +7,7 @@ try:  # allow us to run simulations on Linux
 except ImportError:
     pass
 
-import wlm_constants as wlm
+from highfinesse import wlm_constants as wlm
 
 # These wavelength ranges do not match those in the documentation, but are
 # extracted from the one multi-range WS6 we have access to
