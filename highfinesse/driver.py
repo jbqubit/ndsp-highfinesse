@@ -44,6 +44,7 @@ class HighFinesse:
     def __init__(self, simulation=False):
         self.simulation = simulation
         if self.simulation:
+            print('simulation!')
             return
 
         try:
@@ -164,7 +165,7 @@ class HighFinesse:
           WLMMeasurementStatus and frequency is in Hz.
         """
         if self.simulation:
-            return 0, WLMMeasurementStatus.OKAY
+            return WLMMeasurementStatus.OKAY.value, 123.456789e12
 
         # this should never time out, but it does...
         # I've had a long discussion with the HF engineers about why this
@@ -174,15 +175,15 @@ class HighFinesse:
             freq = self.lib.GetFrequencyNum(ch, 0)
         except WLMException as e:
             logger.error("error during frequency read: {}".format(e))
-            return WLMMeasurementStatus.ERROR, 0
+            return WLMMeasurementStatus.ERROR.value, 0
 
         if freq > 0:
-            return WLMMeasurementStatus.OKAY, freq * 1e12
+            return WLMMeasurementStatus.OKAY.value, freq * 1e12
         elif freq == wlm.ErrBigSignal:
-            return WLMMeasurementStatus.OVER_EXPOSED, 0
+            return WLMMeasurementStatus.OVER_EXPOSED.value, 0
         elif freq == wlm.ErrLowSignal:
-            return WLMMeasurementStatus.UNDER_EXPOSED, 0
+            return WLMMeasurementStatus.UNDER_EXPOSED.value, 0
         else:
             logger.error("error getting frequency: {}"
                          .format(wlm.error_to_str(freq)))
-            return WLMMeasurementStatus.ERROR, 0
+            return WLMMeasurementStatus.ERROR.value, 0
