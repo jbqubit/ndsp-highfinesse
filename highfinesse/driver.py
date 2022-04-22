@@ -1,6 +1,5 @@
-# Written by Joe Britton, 2015
-# Modified by Ryan Gresia, 2021
-# Debugging and small additions by Connor Goham, 2021
+# Written by Joe Britton, 2022
+
 
 import logging
 import asyncio

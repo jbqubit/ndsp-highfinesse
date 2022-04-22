@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-# Written by Joe Britton, 2015
-# Modified by Ryan Gresia, 2021
+# Written by Joe Britton, 2022
 
 import argparse
 import logging
