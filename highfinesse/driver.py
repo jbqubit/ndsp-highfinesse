@@ -30,11 +30,9 @@ class WLMMeasurementStatus(IntEnum):
 
 class WLMException(Exception):
     """ Raised on errors involving the WLM interface library (windata.dll) """
-    pass
-
-
-class UnexpectedResponse(Exception):
-    pass
+    def __init__(self, value):
+        s = 'WLMException: {}'.format(value)
+        logger.error(s)
 
 
 class HighFinesse:
@@ -44,7 +42,7 @@ class HighFinesse:
     def __init__(self, simulation=False):
         self.simulation = simulation
         if self.simulation:
-            print('simulation!')
+            logger.info('simulation mode active')
             return
 
         try:
@@ -129,6 +127,7 @@ class HighFinesse:
         except asyncio.CancelledError:
             raise
         except Exception:
+            raise WLMException('ping failed')
             return False
         logger.debug("ping successful")
         return True
@@ -180,8 +179,10 @@ class HighFinesse:
         if freq > 0:
             return WLMMeasurementStatus.OKAY.value, freq * 1e12
         elif freq == wlm.ErrBigSignal:
+            logger.warning("OVER_EXPOSED: ch {}".format(ch))
             return WLMMeasurementStatus.OVER_EXPOSED.value, 0
         elif freq == wlm.ErrLowSignal:
+            logger.warning("UNDER_EXPOSED: ch {}".format(ch))
             return WLMMeasurementStatus.UNDER_EXPOSED.value, 0
         else:
             logger.error("error getting frequency: {}"
