@@ -94,6 +94,10 @@ class HighFinesse:
         pass
 
     async def id(self):
+        """ :returns: WLM identification string """
+        if self.simulation:
+            return "WLM simulator"
+
         """Sends the id command and prints output."""
         self.wlm_model = self.lib.GetWLMVersion(0)
         self.wlm_hw_rev = self.lib.GetWLMVersion(1)
@@ -106,10 +110,6 @@ class HighFinesse:
 
         # WS/6 have 1, WS/7 & WS/8 & WS/U have 2
         self._num_ccds = 2 if self.wlm_model >= 7 else 1
-
-        """ :returns: WLM identification string """
-        if self.simulation:
-            return "WLM simulator"
 
         return "WLM {} rev {}, firmware {}.{}".format(
             self.wlm_model, self.wlm_hw_rev, self.wlm_fw_rev,
