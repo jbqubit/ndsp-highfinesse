@@ -121,6 +121,9 @@ class HighFinesse:
         pass
 
     async def ping(self):
+        if self.simulation:
+            logger.debug('ping simulation')
+            return True
         try:
             await self.get_status()
         except asyncio.CancelledError:
