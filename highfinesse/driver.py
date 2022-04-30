@@ -7,6 +7,7 @@ from highfinesse import wlm_constants as wlm
 from enum import IntEnum
 try:  # permits running in simulation mode on linux
     from ctypes import windll, c_double, c_ushort, c_long, c_bool, byref, c_short
+    from ctypes import c_char_p, create_string_buffer, pointer
 except ImportError:
     pass
 
@@ -67,6 +68,9 @@ class HighFinesse:
         lib.SetExposureModeNum.argtypes = [c_long, c_bool]
         lib.GetFrequencyNum.restype = c_double
         lib.GetFrequencyNum.argtypes = [c_long, c_double]
+        lib.GetPIDCourseNum.argtypes = [c_long, c_char_p]
+        lib.SetPIDCourseNum.argtypes = [c_long, c_char_p]
+
 
         # Check the WLM server application is running and start it if necessary
         if not lib.Instantiate(wlm.cInstCheckForWLM, 0, 0, 0):
@@ -161,6 +165,7 @@ class HighFinesse:
 
     async def get_frequency(self, ch):
         """ Returns the frequency of the specified channel.
+        ch is mems mirror channel
 
         :returns: the tuple (status, frequency) where status is a
           WLMMeasurementStatus and frequency is in Hz.
@@ -190,3 +195,40 @@ class HighFinesse:
             logger.error("error getting frequency: {}"
                          .format(wlm.error_to_str(freq)))
             return WLMMeasurementStatus.ERROR.value, 0
+
+    async def get_pid_course_num(self, analog_port):
+        """ Returns the PID regulation course of the PID regulation function.
+        analog_port is the analog output channel number
+
+        :returns: status message
+        """
+        if self.simulation:
+            return WLMMeasurementStatus.OKAY.value, 123.456789e12
+
+        try:
+            s = create_string_buffer(1024)
+            r = self.lib.GetPIDCourseNum(analog_port, s)
+        except WLMException as e:
+            logger.error("error during get_pid_course_num: {}".format(e))
+            return WLMMeasurementStatus.ERROR.value, 0
+
+        return s.value
+
+    async def set_pid_course_num(self, analog_port_num, course_string):
+        """ Returns the PID regulation course of the PID regulation function.
+        analog_port is the analog output channel number
+        course_string is a python string describing the servo target (eg '1*300 + 0*384.22918968')
+
+        :returns: status message
+        """
+        if self.simulation:
+            return WLMMeasurementStatus.OKAY.value, 123.456789e12
+
+        try:
+            sb = create_string_buffer(course_string.encode('ascii'), 1024)
+            r = self.lib.SetPIDCourseNum(analog_port_num, sb)
+        except WLMException as e:
+            logger.error("error during get_pid_course_num: {}".format(e))
+            return WLMMeasurementStatus.ERROR.value, 0
+
+        return sb.value
